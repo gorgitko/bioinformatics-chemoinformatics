@@ -1,4 +1,4 @@
-# Example of simple phylogenetic tree drawn by Python module called `turtle`.
+# Example of simple phylogenetic tree drawn by Python module called `turtle`
 
 Tree is drawn recursively, first are left branches and then right branches.
 The idea is simple: `turtle` always stay on its last position and direction.
