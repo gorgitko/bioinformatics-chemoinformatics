@@ -13,7 +13,7 @@ def generate_kmers(chars, length, _string=""):
 for i, x in enumerate(generate_kmers(["A", "T", "C", "G"], 5)):
     print(i, x)
 
-# this do the same
+# this does the same
 """
 for i, x in enumerate(product("ATGC", repeat=5)):
     print(i, "".join(x))
