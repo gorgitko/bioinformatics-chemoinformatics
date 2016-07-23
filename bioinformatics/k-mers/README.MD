@@ -1,3 +1,3 @@
 # Super simple implementation of k-mer generator
 
-But rather use `itertools.product('ATGC', repeat=10)`, because my implementation is really slow.
+It is recursive and really slow so rather use `itertools.product('ATGC', repeat=10)`
