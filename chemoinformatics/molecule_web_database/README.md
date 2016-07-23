@@ -17,7 +17,7 @@ using `conda` and install these SW's (later I will add here the `conda`'s instal
 
 `RDKit` stuff:
 
-[RDKit](http://www.rdkit.org/) - `conda` makes the installation easy, because normally it's a nightmare
+[RDKit](http://www.rdkit.org/) - `conda` makes the installation easy -- normally it's a nightmare
 (compilation, libraries, system variables etc.). Install from http://anaconda.org/rdkit/rdkit
 
 `PostgreSQL` with `RDKit cartridge` - install from http://anaconda.org/rdkit/rdkit-postgresql
