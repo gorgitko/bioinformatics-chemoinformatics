@@ -1,0 +1,9 @@
+model,mean_absolute_error,mean_squared_error,r2_score,explained_variance_score
+LinearRegression,601129.16,2352466324742.47,0.55,0.56
+RandomForestRegressor,124293.73,971363700625.48,0.72,0.74
+TheilSenRegressor,275437.43,5571078734699.32,0.00,0.02
+ExtraTreesRegressor,116647.37,960540241543.92,0.73,0.74
+BayesianRidge,503115.27,5626110966035.77,-0.01,0.00
+SGDRegressor,612013.58,2310379368775.33,0.59,0.60
+SVR,269667.73,5682289092486.32,-0.03,0.01
+ARDRegression,503115.27,5626110966283.55,-0.01,0.00
