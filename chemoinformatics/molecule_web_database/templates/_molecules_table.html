@@ -1,0 +1,345 @@
+{# TODO: tooltip with bigger image of molecule on hover #}
+
+{% block table %}
+    {% if mols %}
+        {% if paginator %}
+            <div class="row">
+                <div class="col-sm-12 col-centered text-center">
+                    {% include "_paginator.html" %}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <div id="div-table">
+                    <table id="table-mols">
+                        <thead>
+                            <tr class="mols">
+                                <th class="mols-select auto-width">
+                                    <input id="input-select-all" type="checkbox" class="input-checkbox-table" />
+                                </th>
+                                <th class="mols-id auto-width">ID</th>
+                                <th class="auto-width">Added</th>
+                                <th class="mols-image">Structure</th>
+                                <th class="auto-width">Sum formula</th>
+                                <th class="break">Name/SMILES</th>
+                                <th class="auto-width">Amount (&mu;l)</th>
+                                {% if user.is_authenticated %}<th>Actions</th>{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mol in mols %}
+                                <tr class="mols">
+                                    <td class="mols-select auto-width">
+                                        <input type="checkbox" value="{{ mol.id }}" class="input-checkbox-table" />
+                                    </td>
+                                    <td class="mols-id auto-width">{{ mol.internal_id }}</td>
+                                    <td class="auto-width">{{ mol.created|date:"Y-m-d H:i" }}</td>
+                                    <td class="mols-image">{{ mol.image_svg|safe }}</td>
+                                    <td class="auto-width">{{ mol.sum_formula }}</td>
+                                    <td class="break" style="width: 20%;">
+                                        {% if mol.name %}
+                                            {{ mol.name }}
+                                        {% endif %}
+
+                                        <hr />
+
+                                        {{ mol.smiles }}
+                                    </td>
+                                    <td class="td-amount auto-width" mol_id="{{ mol.id }}">
+                                        {% if mol.amount > 0 %}
+                                            {{ mol.amount }}
+                                        {% else %}
+                                            <p class="text-danger" style="display: inline; font-size: large;">{{ mol.amount }}</p>
+                                            <div style="display: inline; font-size: 2em;">!</div>
+                                        {% endif %}
+                                    </td>
+                                    {% if user.is_authenticated %}
+                                        <td width="20%">
+                                            <form class="form-inline" enctype="multipart/form-data">
+                                                <label for="input-amount">Amount (&mu;l)</label>
+                                                <input id="input-amount" mol_id="{{ mol.id }}" field="mw" class="input-amount form-control input-sm"
+                                                       type="number" min="0.1" step="0.1" style="width: 30%; margin-left: 10px;" />
+
+                                                <button type="button" mol_id="{{ mol.id }}" class="button-order btn btn-success btn-xs">
+                                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                                </button>
+
+                                                {% if mol.amount > 0 %}
+                                                    <button type="button" mol_id="{{ mol.id }}" class="button-purchase btn btn-danger btn-xs">
+                                                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                                                    </button>
+                                                {% endif %}
+                                            </form>
+
+                                            <div id="div-result" style="margin-top: 5px;"></div>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <a id="a-download">Download SELECTED molecules as SDF</a> | <a id="a-download-all" view_type="{{ type }}">Download ALL molecules as SDF</a>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+            <div id="div-purchase-dialog" style="display: none;"></div>
+        {% endif %}
+    {% else %}
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <h2 class="text-info">No matching molecules found in database.</h2>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $('td.mols-select .input-checkbox-table').change(function ()
+        {
+            var chb = $(this);
+            var tr = chb.parents("tr.mols");
+            var checked = chb.prop("checked");
+
+            if (checked)
+            {
+                tr.addClass("selected");
+            }
+            else
+            {
+                tr.removeClass("selected");
+            }
+        });
+
+        function downloadSdf(type)
+        {
+            if (type == "selected" || type == "search")
+            {
+                if (type == "selected")
+                {
+                    var el = "input:checked";
+                }
+                else if (type == "search")
+                {
+                    var el = "input";
+                }
+
+                var mol_ids = [];
+
+                $("#table-mols tbody").find(el).each(function()
+                {
+                    mol_ids.push($(this).val());
+                });
+
+                var url = "?mol_ids[]=" + mol_ids.join("&mol_ids[]=");
+
+                $.fileDownload("{% url 'api_downloadMolecules' %}" + url);
+            }
+            else if (type == "all")
+            {
+                $.fileDownload("{% url 'api_downloadMolecules' %}" + "?download_all=true");
+            }
+        }
+
+        {% if user.is_authenticated %}
+            // ORDER/PURCHASE STUFF
+
+            function addToOrder(mol_id, amount, info_el)
+            {
+                $.ajax({
+                    url: "{% url 'api_addOrder' %}",
+                    method: "POST",
+                    data: {
+                        "mol_id": mol_id,
+                        "amount": amount
+                    },
+                    success: function(result)
+                    {
+                        //console.log(result);
+
+                        if (result.status == "success")
+                        {
+                            showInfo(result.message, info_el, "success");
+                            $("#nav-a-orders").css("font-weight", "bold");
+                        }
+                        else
+                        {
+                            showInfo(result.message, info_el, "danger");
+                        }
+                    },
+                    error: function(result)
+                    {
+                        showInfo("Internal server error.", info_el, "danger");
+                    },
+                    complete: function()
+                    {
+
+                    }
+                });
+            }
+
+            function addToPurchase(mol_id, amount, purchase_only, info_el)
+            {
+                var data = {
+                        "mol_id": mol_id,
+                        "amount": amount,
+                        "purchase_only": purchase_only
+                    };
+
+                $.ajax({
+                    url: "{% url 'api_addPurchase' %}",
+                    method: "POST",
+                    data: data,
+                    success: function(result)
+                    {
+                        if (result.status == "success")
+                        {
+                            showInfo(result.message, info_el, "success");
+                            $("#table-mols tbody").find("td.td-amount[mol_id='{0}']".format(mol_id)).fadeOut(function()
+                            {
+                                $(this).text("{0}".format(result.data.new_amount)).fadeIn();
+                            });
+                            $("#nav-a-purchases").css("font-weight", "bold");
+                        }
+                        else
+                        {
+                            showInfo(result.message, info_el, "danger");
+                        }
+                    },
+                    error: function(result)
+                    {
+                        showInfo("Internal server error.", info_el, "danger");
+                    },
+                    complete: function()
+                    {
+
+                    }
+                });
+            }
+
+            function getAmount(btn)
+            {
+                var amount_val = btn.prevAll(".input-amount").val();
+
+                if (amount_val.match(/^(\d*[.])?\d+$/))
+                {
+                    return parseFloat(amount_val);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            function transaction(btn, amount, type)
+            {
+                var div_result = btn.parent().next("#div-result");
+
+                if (amount)
+                {
+                    div_result.empty();
+                    if (type == "order") addToOrder(btn.attr("mol_id"), amount, div_result);
+                    else if (type == "purchase") addToPurchase(btn.attr("mol_id"), amount, false, div_result);
+                    else if (type == "purchase_only") addToPurchase(btn.attr("mol_id"), amount, true, div_result);
+                }
+                else
+                {
+                    showInfo("Invalid amount.", div_result, "warning");
+                }
+            }
+
+            $(".button-order").click(function()
+            {
+                var btn = $(this);
+                var amount = getAmount(btn);
+                transaction($(this), amount, "order");
+            });
+
+            $(".button-purchase").click(function()
+            {
+                var btn = $(this);
+                var amount_db = parseFloat(btn.parents("td").prevAll("td.td-amount").text());
+                var amount = getAmount(btn);
+
+                if (amount > amount_db)
+                {
+                    $("#div-purchase-dialog").html(("<p>There is only {0}\u03BCl in stock. Do you want to purchase {1}\u03BCl " +
+                            "and order the rest {2}\u03BCl?</p>").format(amount_db, amount_db, amount - amount_db));
+
+                    var dialog = $("#div-purchase-dialog").dialog({
+                        title: "Purchase",
+                        buttons: {
+                            "Yes, order and purchase": function()
+                            {
+                                transaction(btn, amount, "purchase");
+                                dialog.dialog('close');
+                            },
+                            "No, just purchase":  function()
+                            {
+                                transaction(btn, amount_db, "purchase_only");
+                                dialog.dialog('close');
+                            },
+                            "Cancel":  function()
+                            {
+                                dialog.dialog('close');
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    transaction($(this), amount, "purchase_only");
+                }
+            });
+
+        {% endif %}
+
+        $("#a-download").click(function()
+        {
+            downloadSdf("selected");
+        });
+
+        $("#a-download-all").click(function()
+        {
+            if ($(this).attr("view_type") == "search")
+            {
+                downloadSdf("search");
+            }
+            else if ($(this).attr("view_type") == "list")
+            {
+                downloadSdf("all");
+            }
+        });
+
+        $("#input-select-all").change(function()
+        {
+            var checked = $(this).prop("checked");
+
+            if (checked)
+            {
+                $("#table-mols tbody tr td.mols-select input").each(function()
+                {
+                    $(this).prop("checked", true);
+                    $(this).change();
+                });
+            }
+            else
+            {
+                $("#table-mols tbody tr td.mols-select input").each(function()
+                {
+                    $(this).prop("checked", false);
+                    $(this).change();
+                });
+            }
+        });
+    </script>
+{% endblock %}

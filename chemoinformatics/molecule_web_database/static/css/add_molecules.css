@@ -1,0 +1,12 @@
+#table-info {
+    overflow: hidden;
+    width: 100%;
+    table-layout: fixed;
+    margin: 0 auto;
+    border-top: 1px dotted black;
+    border-collapse: collapse;
+}
+
+#table-info td {
+    word-wrap: break-word;
+}

@@ -1,0 +1,99 @@
+{# TODO: open molecule structure zoomed in new windows (or provide bitmap version) #}
+
+{% extends '_layout.html' %}
+{% block list_active %}active{% endblock %}
+{% load staticfiles %}
+
+{% block staticfiles %}
+    {{ block.super }}
+    <link href="{% static "css/_molecules_table.css" %}" rel="stylesheet" type="text/css">
+
+    <script src="{% static "js/jquery.fileDownload.js" %}"></script>
+{% endblock %}
+
+{% block title %}List molecules{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <h2>List molecules</h2>
+            </div>
+        </div>
+
+        {% if mols %}
+            {% include "_molecules_table.html" %}
+
+            <div class="row">
+                <div class="col-sm-12 col-centered text-center">
+                    <p>Number of all molecules in database: <strong>{{ all_mols_count }}</strong></p>
+                </div>
+            </div>
+        {% else %}
+            <h2 style="color: red;">No molecules found.</h2>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+
+    <script>
+        $('td.mols-select input[type="checkbox"]').change(function ()
+        {
+            var chb = $(this);
+            var tr = chb.parents("tr.mols");
+            var checked = chb.prop("checked");
+
+            if (checked)
+            {
+                tr.addClass("selected");
+            }
+            else
+            {
+                tr.removeClass("selected");
+            }
+        });
+
+        $("#a-download").click(function()
+        {
+            var mol_ids = [];
+
+            $("#table-mols tbody").find("input:checked").each(function()
+            {
+                mol_ids.push($(this).val());
+            });
+
+            var url = "?mol_ids[]=" + mol_ids.join("&mol_ids[]=");
+
+            $.fileDownload("{% url 'api_downloadMolecules' %}" + url);
+        });
+
+        $("#a-download-all").click(function()
+        {
+            $.fileDownload("{% url 'api_downloadMolecules' %}" + "?download_all=true");
+        });
+
+        $("#input-select-all").change(function()
+        {
+            var checked = $(this).prop("checked");
+
+            if (checked)
+            {
+                $("#table-mols tbody tr td.mols-select input").each(function()
+                {
+                    $(this).prop("checked", true);
+                    $(this).change();
+                });
+            }
+            else
+            {
+                $("#table-mols tbody tr td.mols-select input").each(function()
+                {
+                    $(this).prop("checked", false);
+                    $(this).change();
+                });
+            }
+        });
+    </script>
+{% endblock %}

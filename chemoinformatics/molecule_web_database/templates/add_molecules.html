@@ -1,0 +1,371 @@
+{% extends '_layout.html' %}
+{% block add_active %}active{% endblock %}
+{% load staticfiles %}
+
+{% block staticfiles %}
+    {{ block.super }}
+    <script src="{% static "js/ChemDoodleWeb.js" %}"></script>
+    <script src="{% static "js/ChemDoodleWeb-uis.js" %}"></script>
+
+    <link href="{% static "css/ChemDoodleWeb.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "css/jquery-ui-1.10.3.custom.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "css/add_molecules.css" %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block title %}Add molecule{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <h2>Add molecules</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div id="div-chemdoodle" class="col-md-6 col-sm-12 text-center">
+                <div id="panel-chemdoodle" class="panel panel-default">
+                    <div class="panel-heading larger">
+                        Draw a structure
+                    </div>
+
+                    <div class="panel-body">
+                        <canvas id="canvas-chemdoodle"></canvas>
+
+                        <input id="input-smiles" type="text" class="form-control" placeholder="SMILES" readonly="readonly" style="width: 100%;" />
+
+                        <input id="input-name" type="text" class="form-control" placeholder="Name"/>
+
+                        <div class="input-group col-centered">
+                            <button id="button-add" type="submit" class="btn btn-primary">Add</button>
+                            <button id="button-smiles" type="submit" class="btn btn-info">Show SMILES</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12 text-center">
+                <div class="panel panel-default">
+                    <div class="panel-heading larger">
+                        Import molecules from file
+                    </div>
+
+                    <div class="panel-body" style="padding: 30px !important;">
+                        <form id="form-import" class="form-horizontal" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <input id="input-file" class="form-control" type="file" />
+                                <label for="select-file" class="control-label">File type:</label>
+                                <select id="select-file" class="form-control">
+                                    <option id="smiles" value="smiles">SMILES</option>
+                                    <option id="sdf" value="sdf">SDF</option>
+                                </select>
+                                <button id="button-import" type="submit" class="btn btn-primary">Import</button>
+                            </div>
+                        </form>
+
+                        <div class="form-group pull-right">
+                            <button id="button-import-info" type="button" class="btn btn-info" data-toggle="collapse" data-target="#div-import-info" aria-label="Import info" style="display: block;">
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                Info
+                            </button>
+                        </div>
+
+                        <div id="div-import-info" class="collapse" style="margin-top: 10px;">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td class="td-bold">SMILES</td>
+                                        <td>one per line</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td-bold">SDF</td>
+                                        <td>separated by '$$$$'</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 25px; margin-bottom: 50px;">
+            <div class="col-sm-12 col-centered">
+                <div id="div-info"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+
+    <script>
+        var sketcher_width = $("#panel-chemdoodle").outerWidth() - 50;
+        var sketcher_height = 300;
+
+        var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', sketcher_width, 300, {oneMolecule: true, isMobile: true});
+        //var uploadStatusInterval;
+
+        function disableButtons(mode)
+        {
+            if (mode)
+            {
+                $("#button-add").prop('disabled', true);
+                $("#button-import").prop('disabled', true);
+            }
+            else
+            {
+                $("#button-add").prop('disabled', false);
+                $("#button-import").prop('disabled', false);
+            }
+        }
+
+        /*function addUploadedInfo(mol)
+        {
+            $.ajax({
+                url: "/api/uploadMolecules/status",
+                method: "GET",
+                success: function (result)
+                {
+                    //console.log(result);
+
+                    $("#div-mol_number").text(result.mol_number);
+
+                    $.each(result.uploaded_mols, function ()
+                    {
+                        if (this.success)
+                        {
+                            var tr_class = "success";
+                        }
+                        else
+                        {
+                            var tr_class = "error";
+                        }
+
+                        if (this.error)
+                        {
+                            var error = this.error;
+                        }
+                        else
+                        {
+                            var error = "";
+                        }
+
+                        $("#table-info tbody").append(`
+                            <tr class="{0}">
+                                <td style="text-align: left;">{1}</td>
+                                <td>{2}</td>
+                                <td>{3}</td>
+                            </tr>
+                       `.format(tr_class, this.smiles, this.success, error));
+                    });
+
+                    if (result.upload_finished)
+                    {
+                        $("#div-status").text("Upload finished!");
+                        clearInterval(uploadStatusInterval);
+                    }
+                }
+            });
+        }
+
+        function showUploadInfo()
+        {
+            $("#div-table-info").html(`
+                <div id="div-status></div>
+                <div id="div-mol_number></div>
+
+                <table id="table-info" cellpadding="10">
+                    <thead>
+                        <tr>
+                            <th style="width: 75%;">SMILES</th>
+                            <th style="width: 10%;">success</th>
+                            <th style="width: 15%;">error</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            `);
+
+            //uploadStatusInterval = setInterval(addUploadedInfo, 250);
+        }
+
+        // start showing upload info
+        $('#form-import').submit(function(e)
+        {
+            e.preventDefault();
+            showUploadInfo();
+        });
+        */
+
+        function showInfo(result)
+        {
+            //console.log(result);
+
+            $("#div-info").html('<table id="table-info" class="table">' +
+                    '<thead>' +
+                        '<tr>' +
+                            '<th style="width: 70%;">SMILES</th>' +
+                            '<th style="width: 10%;">success</th>' +
+                            '<th style="width: 20%;">error</th>' +
+                    '</thead>' +
+                    '<tbody>' +
+                    '</tbody>' +
+                '</table>');
+
+            $.each(result.data, function()
+            {
+                if (this.success)
+                {
+                    var tr_class = "success";
+                }
+                else
+                {
+                    var tr_class = "error";
+                }
+
+                if (this.error)
+                {
+                    var error = this.error;
+                }
+                else
+                {
+                    var error = "";
+                }
+
+                $("#table-info tbody").append(('<tr class="{0}">' +
+                        '<td style="text-align: left;">{1}</td>' +
+                        '<td>{2}</td>' +
+                        '<td>{3}</td>' +
+                    '</tr>').format(tr_class, this.smiles, this.success, error));
+            });
+        }
+
+        $(window).on('resize', function()
+        {
+            sketcher.resize($("#panel-chemdoodle").outerWidth() - 50, sketcher_height);
+        });
+
+        $("#button-add").click(function()
+        {
+            var molfile = ChemDoodle.writeMOL(sketcher.getMolecule());
+
+            if (molfile != "")
+            {
+                var button = $(this);
+                toggleLoad(true, "#div-info", "normal");
+                disableButtons(true);
+
+                $.ajax({
+                    url: "{% url 'api_addMolecule' %}",
+                    method: "POST",
+                    data: {
+                        "molfile": ChemDoodle.writeMOL(sketcher.getMolecule()),
+                        "name": $("#input-name").val()
+                    },
+                    success: function(result)
+                    {
+                        //console.log(result);
+
+                        if (result.status == "success")
+                        {
+                            showInfo(result);
+                        }
+                        else
+                        {
+                            $("#div-info").prepend("<p class='text-warning'>" + result.message + "</p>");
+                        }
+                    },
+                    error: function(result)
+                    {
+                        $("#div-info").prepend("<div id='div-error'>Internal server error.</div>");
+                    },
+                    complete: function()
+                    {
+                        $("#button-smiles").trigger("click");
+                        toggleLoad(false, "#div-info");
+                        disableButtons(false);
+                    }
+                });
+            }
+            else
+            {
+                $("#div-info").html("<p class='error'>Cannot add empty molecule!</p>");
+            }
+        });
+
+        $("#button-smiles").click(function()
+        {
+            var button = $(this);
+
+            $.ajax({
+                url: "{% url 'api_molConverter' %}",
+                method: "POST",
+                data: {data: ChemDoodle.writeMOL(sketcher.getMolecule()), format_from: "molfile", format_to: "smiles"},
+                success: function(result)
+                {
+                    if (result.success)
+                    {
+                        $("#input-smiles").val(result.data);
+                    }
+                    else
+                    {
+                        $("#input-smiles").val(result.error);
+                    }
+                }
+            });
+        });
+
+        $('#form-import').submit(function(e)
+        {
+            e.preventDefault();
+
+            if (!$("#input-file").val())
+            {
+                alert("No file selected!");
+                return;
+            }
+
+            $("#div-info").empty();
+            toggleLoad(true, "#div-info", "normal");
+            disableButtons(true);
+
+            var fd = new FormData();
+            fd.append("file", $("#input-file")[0].files[0]);
+            fd.append("filetype", $(this).find("option:selected").val());
+
+            $.ajax({
+                url: "{% url 'api_uploadMolecules' %}",
+                type: "POST",
+                data: fd,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function(result)
+                {
+                    //console.log(result);
+
+                    if (result.status == "success")
+                    {
+                        showInfo(result);
+                    }
+                    else
+                    {
+                        $("#div-info").html("<p class='text-warning'>" + result.message + "</p>");
+                    }
+                },
+                error: function(result)
+                {
+                    $("#div-info").prepend("<div id='div-error'>Internal server error.</div>");
+                },
+                complete: function()
+                {
+                    toggleLoad(false, "#div-info");
+                    disableButtons(false);
+                }
+            });
+        });
+    </script>
+{% endblock %}

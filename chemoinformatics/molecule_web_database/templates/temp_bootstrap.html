@@ -1,0 +1,144 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Bootstrap 101 Template</title>
+
+        <script src="{% static "js/jquery-min.js" %}"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+              integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"
+              crossorigin="anonymous"> -->
+        <link rel="stylesheet" href="{% static "css/bootstrap/united.css" %}" />
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+    <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Brand</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+      <form class="navbar-form navbar-left" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+        <h1>Hello, world!</h1>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div id="div-chemdoodle" class="col-md-2" style="width: 50%;">
+                <p>Search by exact match or substructure:</p>
+            </div>
+
+            <div id="div-search-fields" class="col-md-2" style="width: 50%;">
+                <p>Search by molecular properties:</p>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row" style="text-align: center;">
+            <div id="div-results" class="col-md-1">
+                abc
+            </div>
+        </div>
+    </div>
+    </body>
+</html>
+
+<div class="row">
+            <div id="div-chemdoodle" class="col-md-6 col-sm-12 text-center" style="border-right: 1px dotted black;">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Draw a structure</div>
+  <div class="panel-body">
+    Panel content
+  </div>
+                <h3>Draw a structure</h3>
+
+                <canvas id="canvas-chemdoodle"></canvas>
+
+                <input id="input-smiles" type="text" class="form-control" readonly="readonly" style="width: 100%;" />
+
+                <div class="input-group col-centered">
+                    <button id="button-add" type="submit" class="btn btn-primary">Add</button>
+                    <button id="button-smiles" type="submit" class="btn btn-primary">Show SMILES</button>
+                </div>
+                </div>
+            </div>
+
+<div class="col-md-6 col-sm-12 text-center" style="margin-left: 50px;">
+                <h3>Import molecules from file</h3>
+
+                <form id="form-import" class="form-horizontal" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input id="input-file" class="form-control" type="file" />
+                        <label for="select-file" class="control-label">File type:</label>
+                        <select id="select-file" class="form-control">
+                            <option id="smiles" value="smiles">SMILES</option>
+                            <option id="sdf" value="sdf">SDF</option>
+                        </select>
+                        <button id="button-import" type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+
+                <div class="form-group pull-right">
+                    <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#div-import-info" aria-label="Import info" style="display: block;">
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                        Info
+                    </button>
+                </div>

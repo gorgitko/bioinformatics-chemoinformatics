@@ -1,0 +1,64 @@
+table {
+    overflow: hidden;
+    table-layout: fixed;
+    margin: 0 auto;
+    border: 1px dotted black;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+tr.mols {
+    border: 1px solid black;
+}
+
+tr.mols th {
+    padding-bottom: 5px;
+    padding-top: 5px;
+    text-align: center;
+}
+
+tr.mols td, th {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-left: 1px dotted black;
+    text-align: center;
+}
+
+tbody {
+    border-bottom: 1px solid black;
+}
+
+thead tr.mols {
+    border-bottom: 3px solid black;
+}
+
+tr.mols td.mols-image, th.mols-image {
+    padding-left: 20px;
+}
+
+tr.mols td.mols-select, th.mols-select {
+    border-right: 1px solid black;
+}
+
+tr.mols th.mols-select:hover {
+    cursor: pointer;
+}
+
+tr.mols.selected {
+    background-color: #80e4ff;
+}
+
+
+#div-table {
+    padding-right: 1%;
+    padding-left: 1%;
+}
+
+.auto-width {
+    width: auto;
+}
+
+.break {
+    word-break: break-all;
+    width: 30%;
+}

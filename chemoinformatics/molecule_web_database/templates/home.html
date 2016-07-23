@@ -1,0 +1,61 @@
+{% extends '_layout.html' %}
+{% block home_active %}active{% endblock %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center col-heading">
+                <h2>Welcome to MolDB!</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <p>Currently there are {{ molecules_count }} molecules in the database.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>About</h2>
+
+                <p>
+                    This site is a demo application for administration of chemical store.
+                    It allows basic operations, such as:
+                </p>
+
+                <ul>
+                    <li>
+                        Adding the molecules from structure editor or SDF/SMILES files.
+                    </li>
+                    <li>
+                        Searching molecules by their (sub)structure or properties (including <i>SMARTS</i> queries).
+                    </li>
+                    <li>
+                        Purchasing and ordering some amount of molecules.
+                    </li>
+                    <li>
+                        Simple authorization system included.
+                    </li>
+                </ul>
+
+                <p>
+                    To try all features, log in with username <i>slavek</i> and password <i>slavek</i>
+                </p>
+
+                <p>
+                    <strong>Remind that it is just a simple demo and we can add every feature you need.</strong> We think that our application
+                    can be very helpful in every lab that needs some central administration of chemical supplies. And
+                    because it is a web application, it can be accessed from every device - PC, tablet, phone. Also it
+                    doesn't matter what OS are you using - it will look like same on both Windows and Linux.
+                </p>
+
+                <p>
+                    If you or your lab is interested in it, feel free to contact us at <a href="mailto:moldb@chemit.com">moldb@chemit.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

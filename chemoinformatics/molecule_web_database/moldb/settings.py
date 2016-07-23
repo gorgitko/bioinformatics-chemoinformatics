@@ -1,0 +1,4 @@
+# settings for moldb
+
+MOLECULES_PER_SEARCH_PAGE = 20
+MOLECULES_PER_LIST_PAGE = 20

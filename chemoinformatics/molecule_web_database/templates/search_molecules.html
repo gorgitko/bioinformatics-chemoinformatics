@@ -1,0 +1,388 @@
+{# TODO: searching by summary formula: parse summary formula to atoms and then search this atoms separated, joined by AND #}
+
+{% extends '_layout.html' %}
+{% block search_active %}active{% endblock %}
+{% load staticfiles %}
+
+{% block staticfiles %}
+    {{ block.super }}
+    <script src="{% static "js/jquery.fileDownload.js" %}"></script>
+    <script src="{% static "js/ChemDoodleWeb.js" %}"></script>
+    <script src="{% static "js/ChemDoodleWeb-uis.js" %}"></script>
+
+    <link href="{% static "css/ChemDoodleWeb.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "css/jquery-ui-1.10.3.custom.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "css/search_molecules.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "css/_molecules_table.css" %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block title %}Search molecules{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <h2>Search molecules</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div id="div-chemdoodle" class="col-md-6 col-sm-12 text-center">
+                <div id="panel-chemdoodle" class="panel panel-default">
+                    <div class="panel-heading larger">
+                        Search by structure
+                    </div>
+
+                    <div class="panel-body">
+                        <canvas id="canvas-chemdoodle"></canvas>
+
+                        <div class="input-group col-centered">
+                            <button id="button-search-exact" type="submit" class="btn btn-primary">Search exact</button>
+                            <button id="button-search-substructure" type="submit" class="btn btn-primary">Search substructure</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12 text-center">
+                <div class="panel panel-default">
+                    <div class="panel-heading larger">
+                        Search by molecular properties
+                    </div>
+
+                    <div class="panel-body" style="padding: 30px !important;">
+                        <form id="form-filter" class="form-horizontal" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="input-mw" class="col-sm-2 control-label">Molecular weight</label>
+                                <div class="col-sm-2">
+                                    <select id="select-mw" class="form-control">
+                                        <option value="lt">&lt;</option>
+                                        <option value="">=</option>
+                                        <option value="gt">&gt;</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-7">
+                                    <input id="input-mw" field="mw" class="form-control molecule-search-number"
+                                           type="number" min="0.1" step="0.1" disabled="disabled" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <input for_input="input-mw" type="checkbox" class="input-enable" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input-formula" class="col-sm-2 control-label">Summary formula</label>
+                                <div class="col-sm-9">
+                                    <input id="input-formula" field="sum_formula" class="form-control molecule-search-text"
+                                           type="text" disabled="disabled" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <input for_input="input-formula" type="checkbox" class="input-enable" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input-name" class="col-sm-2 control-label">Name</label>
+                                <div class="col-sm-9">
+                                    <input id="input-name" field="name" class="form-control molecule-search-text"
+                                           type="text" disabled="disabled" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <input for_input="input-name" type="checkbox" class="input-enable" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input-smiles" class="col-sm-2 control-label">SMILES</label>
+                                <div class="col-sm-9">
+                                    <input id="input-smiles" field="rdmol" class="form-control molecule-search-text"
+                                           type="text" disabled="disabled" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <input for_input="input-smiles" type="checkbox" class="input-enable" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input-inchi" class="col-sm-2 control-label">InChi</label>
+                                <div class="col-sm-9">
+                                    <input id="input-inchi" field="inchi" class="form-control molecule-search-text"
+                                           type="text" disabled="disabled" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <input for_input="input-inchi" type="checkbox" class="input-enable" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input-inchikey" class="col-sm-2 control-label">InChi key</label>
+                                <div class="col-sm-9">
+                                    <input id="input-inchikey" field="inchi_key" class="form-control molecule-search-text"
+                                           type="text" disabled="disabled" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <input for_input="input-inchikey" type="checkbox" class="input-enable" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input-smarts" class="col-sm-2 control-label">SMARTS</label>
+                                <div class="col-sm-9">
+                                    <input id="input-smarts" field="smarts" class="form-control molecule-search-text"
+                                           type="text" disabled="disabled" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <input for_input="input-smarts" type="checkbox" class="input-enable" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <button id="button-search-or" type="button" class="btn btn-primary">Search with OR</button>
+                                    <button id="button-search-and" type="button" class="btn btn-primary">Search with AND</button>
+                                    <button id="button-filter-reset" type="button" class="btn btn-warning">
+                                        <span class="glyphicon glyphicon glyphicon-refresh"></span>
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 text-center col-centered">
+                <div id="div-info"></div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 25px; margin-bottom: 50px;">
+            <div class="col-sm-12 col-centered">
+                <div id="div-results"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+
+    <script>
+        var sketcher_width = $("#panel-chemdoodle").outerWidth() - 50;
+        var sketcher_height = 300;
+
+        var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', sketcher_width, 300, {oneMolecule: true, isMobile: true});
+
+        $(window).on('resize', function()
+        {
+            sketcher.resize($("#panel-chemdoodle").outerWidth() - 50, sketcher_height);
+        });
+
+        function disableButtons(mode)
+        {
+            if (mode)
+            {
+                $("button").prop('disabled', true);
+            }
+            else
+            {
+                $("button").prop('disabled', false);
+            }
+        }
+
+        function showAlert(message, type)
+        {
+            $("#div-info").html("<div class='alert alert-" + type + " alert-dismissible'>" +
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+                        message + "</div>");
+        }
+
+        function getSearchResults(url, data, loader)
+        {
+            data["form"] = "table";
+
+            if (loader) toggleLoad(true, "#div-results", "normal");
+
+            disableButtons(true);
+
+            $.ajax({
+                    url: url,
+                    method: "POST",
+                    data: data,
+                    success: function(result)
+                    {
+                        //console.log(result);
+
+                        if (result.status == "success")
+                        {
+                            if (parseInt(result.data.mols_count) > 0)
+                            {
+                                $("#div-results").html(result.data.table);
+                                showAlert("Found <strong>" + result.data.mols_count + "</strong> molecules in database.", "success");
+                            }
+                        }
+                        else
+                        {
+                            showAlert(result.message, "warning");
+                        }
+                    },
+                    error: function(result)
+                    {
+                        showAlert("Internal server error.", "danger");
+                        if (loader) toggleLoad(false, "#div-results");
+                    },
+                    complete: function()
+                    {
+                        if (loader) toggleLoad(false, "#div-results");
+                        disableButtons(false);
+                    }
+            });
+        }
+
+        function prepareStructureForSearch(type)
+        {
+            var molfile = ChemDoodle.writeMOL(sketcher.getMolecule());
+
+            if (molfile != "")
+            {
+                getSearchResults("{% url 'api_searchMoleculesByStructure' %}",
+                                {
+                                    "molfile": ChemDoodle.writeMOL(sketcher.getMolecule()),
+                                    "type": type
+                                },
+                                true
+                );
+            }
+            else
+            {
+                showAlert("Cannot search empty molecule!", "warning");
+            }
+        }
+
+        function prepareFilterForSearch(type)
+        {
+            var data = {"fields": [], "values": []};
+
+            $("input.molecule-search-text").each(function()
+            {
+                var input_el = $(this);
+
+                if ($("input[type='checkbox'][for_input='" + input_el.attr("id") + "']").is(":checked"))
+                {
+                    input_text = input_el.val();
+                    var field = input_el.attr("field");
+
+                    if (input_text)
+                    {
+                        data["fields"].push(field);
+                        data["values"].push(input_text);
+                    }
+                }
+            });
+
+            if ($("input[type='checkbox'][for_input='input-mw']").is(":checked"))
+            {
+                var mw_val = $("#input-mw").val();
+
+                if (mw_val != "" && mw_val.match(/^(\d*[.])?\d+$/))
+                {
+                    var mw = parseFloat(mw_val);
+
+                    if (mw > 0)
+                    {
+                        var mw_type = $("#select-mw option:selected").val();
+
+                        if (mw_type)
+                        {
+                            data["fields"].push("mw__" + mw_type);
+                        }
+                        else
+                        {
+                            data["fields"].push("mw");
+                        }
+
+                        data["values"].push(mw);
+                    }
+                    else
+                    {
+                        showAlert("Molecular weight must be greater than 0!", "warning");
+                        return;
+                    }
+                }
+            }
+
+            if ($.isEmptyObject(data.fields))
+            {
+                showAlert("All search fields are empty!", "warning");
+            }
+            else
+            {
+                data["search_type"] = type;
+                getSearchResults("{% url 'api_searchMoleculesByFilter' %}", data, true);
+            }
+        }
+
+        $("#button-search-exact").click(function()
+        {
+            $("#div-info").empty();
+            prepareStructureForSearch("exact");
+        });
+
+        $("#button-search-substructure").click(function()
+        {
+            $("#div-info").empty();
+            prepareStructureForSearch("substructure");
+        });
+
+        $("#button-search-and").click(function()
+        {
+            $("#div-info").empty();
+            prepareFilterForSearch("and")
+        });
+
+        $("#button-search-or").click(function()
+        {
+            $("#div-info").empty();
+            prepareFilterForSearch("or");
+        });
+
+        $("#button-filter-reset").click(function()
+        {
+            $(".molecule-search-text, .molecule-search-number").each(function()
+            {
+                $(this).val("");
+            });
+        });
+
+        $("body").on("click", ".a-paginator", function(e)
+        {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleLoad(true, ".div-paginator", "small");
+            getSearchResults("{% url 'api_searchMoleculesByFilter' %}",
+                            data={
+                                "page": $(this).attr("page"),
+                                "paginator_number": $(this).attr("paginator_number")
+                            });
+            toggleLoad(false, ".div-paginator");
+        });
+
+        $(".input-enable").change(function()
+        {
+            var chb = $(this);
+            var checked = chb.prop("checked");
+            var related_input = chb.parent().prev().find("input.molecule-search-number, input.molecule-search-text");
+
+            if (checked)
+            {
+                related_input.prop("disabled", false);
+            }
+            else
+            {
+                related_input.prop("disabled", true);
+            }
+        });
+    </script>
+{% endblock %}

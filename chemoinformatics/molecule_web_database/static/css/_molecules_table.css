@@ -1,0 +1,76 @@
+#table-mols {
+    overflow: hidden;
+    table-layout: fixed;
+    margin: 0 auto;
+    border: 1px dotted black;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+tr.mols {
+    border: 1px solid black;
+}
+
+tr.mols th {
+    padding-bottom: 5px;
+    padding-top: 5px;
+    text-align: center;
+}
+
+tr.mols td, th {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-left: 1px dotted black;
+}
+
+tbody {
+    border-bottom: 1px solid black;
+}
+
+thead tr.mols {
+    border-bottom: 3px solid black;
+}
+
+tr.mols td.mols-image, th.mols-image {
+    padding-left: 20px;
+}
+
+tr.mols td.mols-select, th.mols-select {
+    border-right: 1px solid black;
+}
+
+tr.mols th.mols-select:hover {
+    cursor: pointer;
+}
+
+tr.mols.selected {
+    background-color: #80e4ff;
+}
+
+.div-pagination {
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid black;
+}
+
+.input-checkbox-table {
+    -ms-transform: scale(2); /* IE */
+    -moz-transform: scale(2); /* FF */
+    -webkit-transform: scale(2); /* Safari and Chrome */
+    -o-transform: scale(2); /* Opera */
+}
+
+#div-table {
+    padding-right: 1%;
+    padding-left: 1%;
+}
+
+.auto-width {
+    width: auto;
+}
+
+.break {
+    word-break: break-all;
+    width: 30%;
+}
