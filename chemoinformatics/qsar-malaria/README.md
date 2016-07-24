@@ -12,7 +12,8 @@ Another project for credit.
 
 I am using the `conda` package manager and it's great: http://conda.pydata.org/docs/
 
-I strongly recommend you to create new environment using `conda` and install these SW's:
+I strongly recommend you to create new environment
+using `conda` and [requirements.txt](https://github.com/gorgitko/bioinformatics-chemoinformatics/blob/master/chemoinformatics/qsar-malaria/requirements.txt) or install these SW's manually with `conda install`:
 
 `Python 3.5+`
 
