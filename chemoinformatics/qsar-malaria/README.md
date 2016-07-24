@@ -13,15 +13,4 @@ Another project for credit.
 I am using the `conda` package manager and it's great: http://conda.pydata.org/docs/
 
 I strongly recommend you to create new environment
-using `conda` and [requirements.txt](https://github.com/gorgitko/bioinformatics-chemoinformatics/blob/master/chemoinformatics/qsar-malaria/requirements.txt) or install these SW's manually with `conda install`:
-
-`Python 3.5+`
-
-[RDKit](http://www.rdkit.org/) - `conda` makes the installation easy -- normally it's a nightmare
-(compilation, libraries, system variables etc.). Install from http://anaconda.org/rdkit/rdkit
-
-[numpy](http://www.numpy.org/)
-
-[pandas](http://pandas.pydata.org/)
-
-[Jupyter](http://jupyter.org/) - for iPython notebook
+using `conda` and [requirements.txt](https://github.com/gorgitko/bioinformatics-chemoinformatics/blob/master/chemoinformatics/qsar-malaria/requirements.txt).
